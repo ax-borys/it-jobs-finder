@@ -1,0 +1,10 @@
+{
+  "name": "@job-parser/justjoinit-parser",
+  "main": "index.ts",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.0",
+  "type": "module"
+}
