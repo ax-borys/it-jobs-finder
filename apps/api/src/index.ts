@@ -5,7 +5,13 @@ import { Hono } from 'hono';
 const app = new Hono();
 
 app.get('/', async (c) => {
-   const jobs = await parseJustJoinIt();
+   const twoHoursAgo = new Date();
+   twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+
+   const jobs = await parseJustJoinIt({
+      ctx: { lastHandledDate: twoHoursAgo },
+   });
+
    return c.json(jobs);
 });
 
