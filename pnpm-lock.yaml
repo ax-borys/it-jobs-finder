@@ -6,7 +6,17 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.39
+        version: 20.19.39
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   apps/api:
     dependencies:
@@ -15,25 +25,15 @@ importers:
         version: 1.19.14(hono@4.12.14)
       '@job-parser/justjoinit-parser':
         specifier: workspace:*
-        version: link:../parsers/justjoinit-parser
+        version: link:../../packages/parsers/justjoinit-parser
       '@job-parser/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       hono:
         specifier: ^4.12.14
         version: 4.12.14
-    devDependencies:
-      '@types/node':
-        specifier: ^20.11.17
-        version: 20.19.39
-      tsx:
-        specifier: ^4.7.1
-        version: 4.21.0
-      typescript:
-        specifier: ^5.8.3
-        version: 5.9.3
 
-  apps/parsers/justjoinit-parser: {}
+  packages/parsers/justjoinit-parser: {}
 
   packages/shared: {}
 

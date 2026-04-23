@@ -1,16 +1,19 @@
 {
+   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ESNext",
     "module": "NodeNext",
-    "strict": true,
+    "moduleResolution": "NodeNext",
     "verbatimModuleSyntax": true,
-    "skipLibCheck": true,
     "types": [
       "node"
     ],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "outDir": "./dist"
+    "outDir": "dist",
+    "rootDir": "src"
   },
+  "references": [{"path": "../../packages/shared"}, {"path": "../../packages/parsers/justjoinit-parser"}],
+ "include": ["src"],
   "exclude": ["node_modules"]
 }
