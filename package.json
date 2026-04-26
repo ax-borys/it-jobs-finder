@@ -4,7 +4,9 @@
    "main": "index.js",
    "type": "module",
    "scripts": {
-      "dev": "pnpm -r build && pnpm --filter @job-parser/api run dev"
+      "build": "pnpm -r build",
+      "dev": "pnpm run build && pnpm --filter @job-parser/api run dev",
+      "start": "pnpm --filter @job-parser/api run start"
    },
    "author": "",
    "license": "ISC",
