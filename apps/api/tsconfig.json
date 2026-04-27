@@ -14,6 +14,8 @@
    },
    "references": [
       { "path": "../../packages/shared" },
+      { "path": "../../packages/db" },
+      { "path": "../../packages/env" },
       { "path": "../../packages/parsers/justjoinit-parser" }
    ],
    "include": ["src"],

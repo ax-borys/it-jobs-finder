@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server';
+import { Hono } from 'hono';
 import {
    createCursorsRegistry,
    getBestCursor,
@@ -6,7 +7,10 @@ import {
    setRecord,
    type Filter,
 } from '@job-parser/justjoinit-parser';
-import { Hono } from 'hono';
+import { db, sql } from '@job-parser/db';
+
+const PORT = process.env.NODE_ENV === 'production' ? 80 : 3000;
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
 const app = new Hono();
 
@@ -37,8 +41,21 @@ app.get('/', async (c) => {
    return c.json(jobs);
 });
 
-const PORT = process.env.NODE_ENV === 'production' ? 80 : 3000;
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+app.get('/health', async (c) => {
+   const services_status: { database: 'Active' | 'Dead' | null } = {
+      database: null,
+   };
+
+   try {
+      await db.execute(sql`select 1`);
+      services_status.database = 'Active';
+   } catch (error) {
+      console.error(error);
+      services_status.database = 'Dead';
+   }
+
+   return c.json(services_status);
+});
 
 serve(
    {

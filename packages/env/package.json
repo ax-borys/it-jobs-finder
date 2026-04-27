@@ -1,0 +1,11 @@
+{
+   "name": "@job-parser/env",
+   "private": true,
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "type": "module",
+   "scripts": {
+      "build": "tsc -b"
+   },
+   "packageManager": "pnpm@10.33.0"
+}
