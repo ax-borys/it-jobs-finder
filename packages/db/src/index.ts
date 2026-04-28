@@ -1,10 +1,7 @@
 import { env } from '@job-parser/env';
-import 'dotenv/config';
 export { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-
-console.log(process.env.DB_PASSWORD);
 
 const pool = new Pool({
    user: env.DB_USER,

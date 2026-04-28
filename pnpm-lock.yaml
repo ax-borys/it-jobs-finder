@@ -8,10 +8,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
     devDependencies:
       '@types/node':
         specifier: ^20.19.39
@@ -62,7 +58,11 @@ importers:
         specifier: ^8.20.0
         version: 8.20.0
 
-  packages/env: {}
+  packages/env:
+    dependencies:
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
 
   packages/parsers/justjoinit-parser: {}
 
