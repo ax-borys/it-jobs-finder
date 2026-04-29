@@ -9,7 +9,9 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+        restart: true
 
   db:
     image: postgres:latest
@@ -19,3 +21,10 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
+    healthcheck:
+      test: pg_isready -U $$DB_USER -d $$DB_NAME
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+      start_interval: 2s
