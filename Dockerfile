@@ -1,7 +1,13 @@
-FROM node:25.9 AS build
-WORKDIR /repo
-
+FROM node:25.9 AS base
 RUN npm install -g pnpm
+
+FROM base AS dev
+WORKDIR /app
+CMD pnpm dev
+EXPOSE 3000
+
+FROM base AS build
+WORKDIR /repo
 
 COPY . .
 
@@ -11,13 +17,11 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 RUN pnpm --filter @job-parser/api deploy --prod /out
 
-FROM node:25.9
+FROM node:25.9 AS prod
 WORKDIR /app
 
 COPY --from=build /out .
 
-ENV NODE_ENV=production
 CMD npm start
 
 EXPOSE 80
-

@@ -1,0 +1,10 @@
+services:
+  api:
+    build:
+      context: .
+      target: dev
+    image: job-parser/api:dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ".:/app"

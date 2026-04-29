@@ -10,7 +10,7 @@ import {
 import { db, sql } from '@job-parser/db';
 
 const PORT = process.env.NODE_ENV === 'production' ? 80 : 3000;
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+const HOST = '0.0.0.0';
 
 const app = new Hono();
 
@@ -64,7 +64,7 @@ serve(
       hostname: HOST,
    },
    (info) => {
-      console.log(`Server is running on http://localhost:${info.port}`);
+      console.log(`Server is running on http://${HOST}:${info.port}`);
       console.log('Mode: ', process.env.NODE_ENV || 'development');
    },
 );
