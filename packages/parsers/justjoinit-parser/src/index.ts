@@ -1,3 +1,5 @@
+import { fetchWithRetry } from '@job-parser/shared';
+
 const url_d =
    'https://justjoin.it/api/candidate-api/offers?from=0&itemsCount=100&categories=javascript&cityRadius=30&currency=pln&orderBy=descending&sortBy=publishedAt&keywordType=skill&isPromoted=true';
 
@@ -170,7 +172,12 @@ async function parseJustJoinIt(
       experienceLevel: experienceLevelMap[options.level],
    });
 
-   const response = await fetch(url);
+   const response = await fetchWithRetry(url, undefined, {
+      maxRetries: 6,
+      baseDelay: 5000,
+      maxDelay: 1000 * 300,
+   });
+
    const json = await response.json();
    const jobs: Vacancy[] = json.data;
 

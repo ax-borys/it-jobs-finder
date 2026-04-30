@@ -64,7 +64,11 @@ importers:
         specifier: ^17.4.2
         version: 17.4.2
 
-  packages/parsers/justjoinit-parser: {}
+  packages/parsers/justjoinit-parser:
+    dependencies:
+      '@job-parser/shared':
+        specifier: workspace:*
+        version: link:../../shared
 
   packages/shared: {}
 
