@@ -8,3 +8,8 @@ services:
       NODE_ENV: production
     ports:
       - "3000:80"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

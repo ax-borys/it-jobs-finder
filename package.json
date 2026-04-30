@@ -6,7 +6,8 @@
    "scripts": {
       "build": "pnpm -r build",
       "dev": "pnpm run build && pnpm --filter @job-parser/api run dev",
-      "start": "pnpm --filter @job-parser/api run start"
+      "start": "pnpm --filter @job-parser/api run start",
+      "dev:compose": "docker compose up"
    },
    "author": "",
    "license": "ISC",
