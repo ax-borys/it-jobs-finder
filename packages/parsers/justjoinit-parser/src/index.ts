@@ -5,9 +5,64 @@ import { fetchWithRetry } from '@job-parser/shared';
 
 type Cursor<T> = T;
 
-type Offer = {
+type Category = {
+   key: string;
+   parentKey: string | null;
+};
+
+type Location = {
+   city: string;
+   street: string;
+   latitude: number;
+   longitude: number;
    slug: string;
+};
+
+type EmploymentType = {
+   from: number;
+   fromPerUnit: number;
+   to: number;
+   toPerUnit: number;
+   currency: string;
+   currencySource: 'original' | 'conversion';
+   type: 'b2b' | 'mandate_contract' | 'permanent';
+   unit: string;
+   gross: boolean;
+};
+
+type Skill = {
+   name: string;
+   level: number;
+};
+
+type Offer = {
+   guid: string;
+   slug: string;
+   title: string;
+   workplaceType: string;
+   workingTime: string;
+   experienceLevel: string;
+   category: Category;
+   city: string;
+   street: string;
+   latitude: number;
+   longitude: number;
+   isRemoteInterview: boolean;
+   companyName: string;
+   companyLogoThumbUrl: string;
    publishedAt: string;
+   isOpenToHireUkrainians: boolean;
+   locations: Location[];
+   employmentTypes: EmploymentType[];
+   requiredSkills: Skill[];
+   niceToHaveSkills: Skill[];
+   languages: string[];
+   isPromoted: boolean;
+   isSuperOffer: boolean;
+   applyMethod: string;
+   lastPublishedAt: string;
+   expiredAt: string;
+   description: string;
 };
 
 type Filter = {
