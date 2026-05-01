@@ -50,6 +50,12 @@ importers:
         specifier: ^4.12.14
         version: 4.12.14
 
+  packages/core:
+    dependencies:
+      '@job-parser/db':
+        specifier: workspace:*
+        version: link:../db
+
   packages/db:
     dependencies:
       '@job-parser/env':

@@ -1,0 +1,12 @@
+{
+   "extends": "../../tsconfig.base.json",
+   "compilerOptions": {
+      "outDir": ".types",
+      "rootDir": "src",
+      "tsBuildInfoFile": "./.types/.tsbuildinfo",
+      "emitDeclarationOnly": true,
+      "declarationMap": true
+   },
+   "references": [{ "path": "../db" }],
+   "include": ["src"]
+}

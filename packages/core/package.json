@@ -1,0 +1,14 @@
+{
+   "name": "@job-parser/core",
+   "private": true,
+   "main": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "type": "module",
+   "scripts": {
+      "build": "tsc -b && tsdown"
+   },
+   "dependencies": {
+      "@job-parser/db": "workspace:*"
+   },
+   "packageManager": "pnpm@10.33.0"
+}
