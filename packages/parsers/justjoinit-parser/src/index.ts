@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { convert } from 'html-to-text';
 
 import { fetchWithRetry } from '@job-parser/shared';
+import { NewVacancy, Vacancy } from '@job-parser/db';
 
 type Cursor<T> = T;
 
@@ -227,7 +228,7 @@ const fetchDescription = async (url: URL | string) => {
 async function parseJustJoinIt(
    options: Filter,
    cursor: Cursor<Date>,
-): Promise<{ data: Offer[]; cursor: Cursor<Date> }> {
+): Promise<{ data: Omit<NewVacancy, 'hash'>[]; cursor: Cursor<Date> }> {
    const vacancies: Offer[] = [];
 
    const url = buildUrl({
@@ -256,7 +257,7 @@ async function parseJustJoinIt(
       return isFresh;
    });
 
-   const enrichedVacancies = [];
+   const enrichedVacancies: Offer[] = [];
 
    for (const vacancy of vacancies) {
       const offerUrl = `https://justjoin.it/job-offer/${vacancy.slug}`;
@@ -265,7 +266,22 @@ async function parseJustJoinIt(
       enrichedVacancies.push({ ...vacancy, description });
    }
 
-   return { data: enrichedVacancies, cursor: new Date(Date.now()) };
+   const mappedVacancies = enrichedVacancies.map(
+      (enrichedVacancy): Omit<NewVacancy, 'hash'> => ({
+         title: enrichedVacancy.title,
+         description: enrichedVacancy.description,
+         experienceLevel: enrichedVacancy.experienceLevel,
+         salaryMin: enrichedVacancy.employmentTypes[0].from,
+         salaryMax: enrichedVacancy.employmentTypes[0].to,
+         skills: [
+            enrichedVacancy.category.key,
+            ...enrichedVacancy.requiredSkills.map((s) => s.name),
+            ...enrichedVacancy.niceToHaveSkills.map((s) => s.name),
+         ],
+      }),
+   );
+
+   return { data: mappedVacancies, cursor: new Date(Date.now()) };
 }
 
 export { parseJustJoinIt, upsertCursor, getBestCursor, createCursorRegistry };

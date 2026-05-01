@@ -80,6 +80,9 @@ importers:
 
   packages/parsers/justjoinit-parser:
     dependencies:
+      '@job-parser/db':
+        specifier: workspace:*
+        version: link:../../db
       '@job-parser/shared':
         specifier: workspace:*
         version: link:../../shared

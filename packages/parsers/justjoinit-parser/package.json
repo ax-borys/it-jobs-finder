@@ -9,6 +9,7 @@
       "build": "tsc -b"
    },
    "dependencies": {
+      "@job-parser/db": "workspace:*",
       "@job-parser/shared": "workspace:*",
       "@types/html-to-text": "^9.0.4",
       "cheerio": "^1.2.0",
