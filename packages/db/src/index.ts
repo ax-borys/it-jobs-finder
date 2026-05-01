@@ -14,3 +14,4 @@ const pool = new Pool({
 const db = drizzle(pool);
 
 export { db };
+export type { Vacancy, NewVacancy } from './models/vacancy';
