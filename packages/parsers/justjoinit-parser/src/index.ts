@@ -1,11 +1,12 @@
-import { fetchWithRetry } from '@job-parser/shared';
+import * as cheerio from 'cheerio';
+import { convert } from 'html-to-text';
 
-const url_d =
-   'https://justjoin.it/api/candidate-api/offers?from=0&itemsCount=100&categories=javascript&cityRadius=30&currency=pln&orderBy=descending&sortBy=publishedAt&keywordType=skill&isPromoted=true';
+import { fetchWithRetry } from '@job-parser/shared';
 
 type Cursor<T> = T;
 
-type Vacancy = {
+type Offer = {
+   slug: string;
    publishedAt: string;
 };
 
@@ -16,54 +17,49 @@ type Filter = {
 };
 
 type FilterOption = Extract<Filter[keyof Filter], string>;
-type FilterTechOption = Extract<Filter['tech'] | Filter['language'], string>;
+type TechOption = Extract<Filter['tech'] | Filter['language'], string>;
 
-type SemanticTechEdge = {
-   [K in FilterTechOption]?: FilterTechOption[];
+type TechDependencies = {
+   [K in TechOption]?: TechOption[];
 };
 
-const semanticTechSheet: SemanticTechEdge[] = [
+const techDependencies: TechDependencies[] = [
    { react: ['javascript'] },
-   {
-      'next.js': ['javascript', 'react'],
-   },
+   { 'next.js': ['javascript', 'react'] },
    { angular: ['javascript'] },
 ];
 
-const normilizeTechs = (techs: FilterTechOption[]): FilterTechOption[] => {
-   const normilizedTechsStack = new Set<FilterTechOption>();
+const normalizeTechs = (techs: TechOption[]): TechOption[] => {
+   const normalizedTechSet = new Set<TechOption>();
 
    for (const tech of techs) {
-      const semanticEdge = semanticTechSheet.find((i) => tech in i);
+      const depEntry = techDependencies.find((i) => tech in i);
 
-      if (semanticEdge) {
-         const deps = semanticEdge[
-            tech as keyof SemanticTechEdge
-         ] as FilterTechOption[];
-
-         deps.forEach((d) => normilizedTechsStack.add(d));
+      if (depEntry) {
+         const deps = depEntry[tech as keyof TechDependencies] as TechOption[];
+         deps.forEach((d) => normalizedTechSet.add(d));
       }
 
-      normilizedTechsStack.add(tech as keyof SemanticTechEdge);
+      normalizedTechSet.add(tech as keyof TechDependencies);
    }
 
-   return [...normilizedTechsStack];
+   return [...normalizedTechSet];
 };
 
-const normilizeOptions = ({
+const normalizeFilter = ({
    tech,
    language,
    ...rest
 }: Filter): FilterOption[] => {
-   const normilizedTechOptions = normilizeTechs([tech, language]);
+   const normalizedTechOptions = normalizeTechs([tech, language]);
    const restOptions = Object.values(rest);
 
-   return [...normilizedTechOptions, ...restOptions];
+   return [...normalizedTechOptions, ...restOptions];
 };
 
-type NormalizedOptions = ReturnType<typeof normilizeOptions>;
+type NormalizedFilter = ReturnType<typeof normalizeFilter>;
 
-const assembleUrl = ({
+const buildUrl = ({
    categories,
    keywords,
    experienceLevel,
@@ -96,33 +92,33 @@ const assembleUrl = ({
    return url;
 };
 
-type CursorRegistry = Map<NormalizedOptions, Cursor<Date>>;
+type CursorRegistry = Map<NormalizedFilter, Cursor<Date>>;
 
-const createCursorsRegistry = (): CursorRegistry => {
-   return new Map<NormalizedOptions, Cursor<Date>>();
+const createCursorRegistry = (): CursorRegistry => {
+   return new Map<NormalizedFilter, Cursor<Date>>();
 };
 
-const setRecord = (
+const upsertCursor = (
    filter: Filter,
    cursor: Cursor<Date>,
    cursorRegistry: CursorRegistry,
 ) => {
-   const filterOptions = normilizeOptions(filter);
+   const filterOptions = normalizeFilter(filter);
 
-   let compatibleKey = null;
+   let matchedKey: NormalizedFilter | null = null;
 
-   cursorRegistry.forEach((v, k, m) => {
-      if (k.length !== filterOptions.length) return;
+   cursorRegistry.forEach((_value, key) => {
+      if (key.length !== filterOptions.length) return;
 
-      const compatible = k.every((i) => filterOptions.includes(i));
+      const isMatch = key.every((i) => filterOptions.includes(i));
 
-      if (compatible) {
-         compatibleKey = k;
+      if (isMatch) {
+         matchedKey = key;
       }
    });
 
-   if (compatibleKey) {
-      cursorRegistry.set(compatibleKey, cursor);
+   if (matchedKey) {
+      cursorRegistry.set(matchedKey, cursor);
    } else {
       cursorRegistry.set(filterOptions, cursor);
    }
@@ -132,25 +128,20 @@ const getBestCursor = (
    filter: Filter,
    cursorRegistry: CursorRegistry,
 ): Cursor<Date> => {
-   const filterOptions = normilizeOptions(filter);
-   const compatibleCursors: Cursor<Date>[] = [];
+   const filterOptions = normalizeFilter(filter);
+   const matchingCursors: Cursor<Date>[] = [];
 
-   cursorRegistry.forEach((v, k, m) => {
-      if (k.length > filterOptions.length) return;
+   cursorRegistry.forEach((cursor, key) => {
+      if (key.length > filterOptions.length) return;
 
-      const compatible = k.every((option) => filterOptions.includes(option));
+      const isMatch = key.every((option) => filterOptions.includes(option));
 
-      if (compatible) {
-         compatibleCursors.push(v);
+      if (isMatch) {
+         matchingCursors.push(cursor);
       }
    });
 
-   const bestCursor: Cursor<Date> = compatibleCursors.reduce(
-      (a, b) => (a > b ? a : b),
-      new Date(0),
-   );
-
-   return bestCursor;
+   return matchingCursors.reduce((a, b) => (a > b ? a : b), new Date(0));
 };
 
 const experienceLevelMap: { [K in Filter['level']]: string } = {
@@ -160,13 +151,31 @@ const experienceLevelMap: { [K in Filter['level']]: string } = {
    senior: 'senior',
 };
 
+const fetchDescription = async (url: URL | string) => {
+   const response: Response = await fetchWithRetry(url, undefined, {
+      maxRetries: 6,
+      baseDelay: 5000,
+      maxDelay: 1000 * 300,
+   });
+
+   const html = await response.text();
+
+   const $ = cheerio.load(html);
+
+   const descriptionElement = $('h3:contains("Job description")').next('div');
+
+   const text = convert($.html(descriptionElement));
+
+   return text;
+};
+
 async function parseJustJoinIt(
    options: Filter,
    cursor: Cursor<Date>,
-): Promise<{ data: Vacancy[]; cursor: Cursor<Date> }> {
-   const vacancies: Vacancy[] = [];
+): Promise<{ data: Offer[]; cursor: Cursor<Date> }> {
+   const vacancies: Offer[] = [];
 
-   const url = assembleUrl({
+   const url = buildUrl({
       categories: options.language,
       keywords: options.tech,
       experienceLevel: experienceLevelMap[options.level],
@@ -179,14 +188,11 @@ async function parseJustJoinIt(
    });
 
    const json = await response.json();
-   const jobs: Vacancy[] = json.data;
-
-   const lastRunDate = cursor;
+   const jobs: Offer[] = json.data;
 
    jobs.every((job) => {
       const publishedAt = new Date(job.publishedAt);
-
-      const isFresh = publishedAt > lastRunDate;
+      const isFresh = publishedAt > cursor;
 
       if (isFresh) {
          vacancies.push(job);
@@ -195,9 +201,18 @@ async function parseJustJoinIt(
       return isFresh;
    });
 
-   return { data: vacancies, cursor: new Date(Date.now()) };
+   const enrichedVacancies = [];
+
+   for (const vacancy of vacancies) {
+      const offerUrl = `https://justjoin.it/job-offer/${vacancy.slug}`;
+      const description = await fetchDescription(offerUrl);
+
+      enrichedVacancies.push({ ...vacancy, description });
+   }
+
+   return { data: enrichedVacancies, cursor: new Date(Date.now()) };
 }
 
-export { parseJustJoinIt, setRecord, getBestCursor, createCursorsRegistry };
+export { parseJustJoinIt, upsertCursor, getBestCursor, createCursorRegistry };
 
 export type { Filter };

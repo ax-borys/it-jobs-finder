@@ -1,10 +1,10 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import {
-   createCursorsRegistry,
+   createCursorRegistry,
    getBestCursor,
    parseJustJoinIt,
-   setRecord,
+   upsertCursor,
    type Filter,
 } from '@job-parser/justjoinit-parser';
 import { db, sql } from '@job-parser/db';
@@ -14,7 +14,7 @@ const HOST = '0.0.0.0';
 
 const app = new Hono();
 
-const cursorRegistry = createCursorsRegistry();
+const cursorRegistry = createCursorRegistry();
 
 // TEST. Remove later
 const pickRandom = (arr: string[]) => {
@@ -34,7 +34,7 @@ app.get('/', async (c) => {
 
    const jobs = result.data;
 
-   setRecord(filter, result.cursor, cursorRegistry);
+   upsertCursor(filter, result.cursor, cursorRegistry);
 
    console.log(cursorRegistry);
 
