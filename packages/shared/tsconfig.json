@@ -3,7 +3,7 @@
    "compilerOptions": {
       "outDir": ".types",
       "rootDir": "src",
-      "tsBuildInfoFile": "./dist/.tsbuildinfo",
+      "tsBuildInfoFile": "./.types/.tsbuildinfo",
       "emitDeclarationOnly": true,
       "declarationMap": true
    },
