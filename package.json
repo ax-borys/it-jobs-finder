@@ -7,7 +7,8 @@
       "build": "pnpm -r build",
       "dev": "pnpm run build && pnpm --filter @job-parser/api run dev",
       "start": "pnpm --filter @job-parser/api run start",
-      "dev:compose": "docker compose up"
+      "start:compose": "docker compose -f compose.yaml -f compose.prod.yaml up",
+      "dev:compose": "pnpm run build && docker compose up"
    },
    "author": "",
    "license": "ISC",
